@@ -1,0 +1,68 @@
+{
+  "info": {
+    "name": "Task Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Task",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"taskTitle\": \"Finish backend assignment\",\n  \"description\": \"Complete Task 1 and Task 2 for the internship\",\n  \"dueDate\": \"2026-07-20\",\n  \"status\": \"Pending\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/tasks", "host": ["{{base_url}}"], "path": ["tasks"] }
+      }
+    },
+    {
+      "name": "View All Tasks",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base_url}}/tasks", "host": ["{{base_url}}"], "path": ["tasks"] }
+      }
+    },
+    {
+      "name": "View Tasks Filtered by Status",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/tasks?status=Pending",
+          "host": ["{{base_url}}"],
+          "path": ["tasks"],
+          "query": [{ "key": "status", "value": "Pending" }]
+        }
+      }
+    },
+    {
+      "name": "View Single Task",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base_url}}/tasks/1", "host": ["{{base_url}}"], "path": ["tasks", "1"] }
+      }
+    },
+    {
+      "name": "Update Task Status",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"taskTitle\": \"Finish backend assignment\",\n  \"description\": \"Complete Task 1 and Task 2 for the internship\",\n  \"dueDate\": \"2026-07-20\",\n  \"status\": \"Completed\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/tasks/1", "host": ["{{base_url}}"], "path": ["tasks", "1"] }
+      }
+    },
+    {
+      "name": "Delete Task",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{base_url}}/tasks/1", "host": ["{{base_url}}"], "path": ["tasks", "1"] }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" }
+  ]
+}

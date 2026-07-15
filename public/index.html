@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task Management System</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 800px; margin: 30px auto; padding: 0 15px; background: #f5f6f8; }
+  h1 { color: #2c3e50; }
+  table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+  th { background: #2c3e50; color: #fff; }
+  form { background: #fff; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  input, select, textarea { display: block; width: 100%; margin: 6px 0; padding: 8px; box-sizing: border-box; }
+  button { padding: 8px 14px; background: #2c3e50; color: #fff; border: none; cursor: pointer; margin-top: 8px; }
+  button:hover { background: #1a252f; }
+  .delete-btn { background: #c0392b; }
+  .delete-btn:hover { background: #922b21; }
+  .filter-bar { margin-bottom: 10px; }
+  .status-pending { color: #d35400; font-weight: bold; }
+  .status-completed { color: #27ae60; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Task Management System</h1>
+
+<form id="addForm">
+  <h3>Add Task</h3>
+  <input type="text" id="taskTitle" placeholder="Task Title" required>
+  <textarea id="description" placeholder="Description"></textarea>
+  <input type="date" id="dueDate">
+  <select id="status">
+    <option value="Pending">Pending</option>
+    <option value="Completed">Completed</option>
+  </select>
+  <button type="submit">Add Task</button>
+</form>
+
+<div class="filter-bar">
+  Filter by status:
+  <select id="filterStatus" onchange="loadTasks()">
+    <option value="">All</option>
+    <option value="Pending">Pending</option>
+    <option value="Completed">Completed</option>
+  </select>
+</div>
+
+<h3>All Tasks</h3>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th><th>Title</th><th>Description</th><th>Due Date</th><th>Status</th><th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="taskTable"></tbody>
+</table>
+
+<script>
+  const API_URL = '/tasks';
+
+  async function loadTasks() {
+    const filter = document.getElementById('filterStatus').value;
+    const url = filter ? `${API_URL}?status=${filter}` : API_URL;
+    const res = await fetch(url);
+    const tasks = await res.json();
+    const tbody = document.getElementById('taskTable');
+    tbody.innerHTML = '';
+    tasks.forEach(t => {
+      const row = document.createElement('tr');
+      const statusClass = t.status === 'Completed' ? 'status-completed' : 'status-pending';
+      row.innerHTML = `
+        <td>${t.id}</td>
+        <td>${t.taskTitle}</td>
+        <td>${t.description || ''}</td>
+        <td>${t.dueDate || ''}</td>
+        <td class="${statusClass}">${t.status}</td>
+        <td>
+          <button onclick="toggleStatus(${t.id}, '${t.status}')">Toggle Status</button>
+          <button class="delete-btn" onclick="deleteTask(${t.id})">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  document.getElementById('addForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      taskTitle: document.getElementById('taskTitle').value,
+      description: document.getElementById('description').value,
+      dueDate: document.getElementById('dueDate').value,
+      status: document.getElementById('status').value
+    };
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    e.target.reset();
+    loadTasks();
+  });
+
+  async function toggleStatus(id, currentStatus) {
+    const res = await fetch(`${API_URL}/${id}`);
+    const task = await res.json();
+    const newStatus = currentStatus === 'Pending' ? 'Completed' : 'Pending';
+    await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...task, status: newStatus })
+    });
+    loadTasks();
+  }
+
+  async function deleteTask(id) {
+    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    loadTasks();
+  }
+
+  loadTasks();
+</script>
+
+</body>
+</html>
